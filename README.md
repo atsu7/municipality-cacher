@@ -5,7 +5,7 @@ Geocaching.comのMy Findsポケットクエリを読み込んで動作します�
 動作はフロントエンドのみで行われます。
 
 # ユーザ向け
-[こちら]()から使えます。
+[こちら](https://atsu7.github.io/municipality-cacher/)から使えます。
 
 このような統計を見ることができます。
 ![sample_screenshot.jpeg](/sample_screenshot.jpeg)
