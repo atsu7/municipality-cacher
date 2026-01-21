@@ -1,0 +1,215 @@
+      <!-- Municipality ranking (moved to bottom) -->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>市区町村Cacher</title>
+  <!-- Material Design (Materialize) -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="top" class="container">
+    <header class="custom-banner">
+      <div class="banner-content">
+        <span class="material-icons banner-icon">explore</span>
+        <span class="banner-title">市区町村Cacher</span>
+      </div>
+    </header>
+
+    <div class="section">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">このアプリについて</span>
+          <p class="small" style="margin-bottom:12px;">
+            あなたのGeocachingのFoundの日本の市区町村ごとの統計を表示します。
+            Project GCでは都道府県ごとにしか表示できませんが、市区町村Cacherでは市区町村レベルでの表示が可能です。
+          </p>
+          <p class="small" style="margin-bottom:16px;">
+            <b>使い方:</b><br>
+            ・「ポケットクエリ（.gpx）を選択」をクリックし、My Findsポケットクエリ（.gpx）をアップロードしてください。自動で地図や統計情報が表示されます
+          </p>
+
+            <details>
+              <summary style="cursor:pointer;font-weight:bold;">My Findsポケットクエリの作成方法（クリックして展開）</summary>
+              <ol style="margin-top:8px;">
+       <li>Geocaching.comのダッシュボードを開く。</li>  
+        <li>左側パネルの「プレミアム・ツール」から「ポケット・クエリを作成」を選択する。</li>  
+        <li>「発見した全ジオキャッシュ」の項目にある「キューに追加」をクリックする。</li>  
+        <li>ページをリロードすると、「ダウンロード可能なポケット・クエリ」タブに  
+        　「My Finds Pocket Query」が表示されるので、これをクリックしてダウンロードする。</li>  
+        <li>ダウンロードした zip ファイルを解凍する。現れる.gpxファイルをこのアプリで使います。</li>
+              </ol>
+            </details>
+            <br>
+            <p class="small" style="margin-bottom:16px;">
+           <b>注意:</b><br>
+            ・ 簡素化した市区町村ポリゴンを使用しているため、都道府県境界や海岸線に近いキャッシュが計上に含まれない場合や、市区町村境界に近いキャッシュが誤った市区町村に計上される場合があります。<br>
+            ・ 海上のキャッシュは計上に含まれません。<br>
+            ・ データはサーバに送信されません。処理はお使いのブラウザ上で行われます。
+              </p>
+          
+          <div id="controls" class="row">
+
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;">
+              <label for="gpxfile" class="btn blue" style="margin:0;cursor:pointer;display:flex;align-items:center;gap:8px;">
+                <span class="material-icons left">file_upload</span>
+                ポケットクエリ（.gpx）を選択
+                <input id="gpxfile" type="file" accept=".gpx" style="display:none;" />
+              </label>
+              <span id="gpxfile-name" style="margin-left:8px;color:#1976d2;font-size:0.95em;"></span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div id="map" style="height:70vh;"></div>
+        </div>
+      </div>
+      <!-- Prefecture counts -->
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">都道府県ごとのキャッシュを見つけた市区町村数</span>
+          <p class="small" style="margin-bottom:12px;">
+            バッジをクリックするとその都道府県のみが表示されます。もう一度クリックすると全国地図に戻ります。
+          </p>
+          <div id="prefCountsList" class="pref-grid">
+            <!-- JS will populate: <div class="pref-item">北海道 <span class="badge">12/20</span></div> -->
+          </div>
+          <!-- When a prefecture is selected, JavaScript will populate this with its municipalities -->
+          <div id="prefMuniList" class="pref-muni-grid muni-grid" style="margin-top:8px;">
+            <!-- JS will populate municipality badges here when a prefecture is selected -->
+          </div>
+        </div>
+      </div>
+      <!-- Challenges card (moved to bottom) -->
+      <!-- Cardinal extremes card -->
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">日本国内でのExtremes</span>
+          <div id="extremes">
+            <table class="ext-table" style="width:100%;border-collapse:collapse;">
+              <tbody>
+                <tr><th style="text-align:left;padding:6px;border-bottom:1px solid #eee;width:140px;">最北</th><td id="ext-north-val" style="padding:6px;border-bottom:1px solid #eee;">—</td></tr>
+                <tr><th style="text-align:left;padding:6px;border-bottom:1px solid #eee;">最南</th><td id="ext-south-val" style="padding:6px;border-bottom:1px solid #eee;">—</td></tr>
+                <tr><th style="text-align:left;padding:6px;border-bottom:1px solid #eee;">最西</th><td id="ext-west-val" style="padding:6px;border-bottom:1px solid #eee;">—</td></tr>
+                <tr><th style="text-align:left;padding:6px;">最東</th><td id="ext-east-val" style="padding:6px;">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+      <!-- Municipality ranking (moved to bottom) -->
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">市区町村別 発見数TOP10</span>
+          <div id="muniRankingList" class="muni-grid">
+            <!-- JS will populate: <div class="muni-item">札幌市 <span class="badge">15</span></div> -->
+          </div>
+        </div>
+      </div>
+      <!-- 1F-only municipalities (new card at the bottom) -->
+      <div class="card">
+        <div class="card-content">
+          <details class="onef-details">
+            <summary class="card-title">Only 1F 市区町村</summary>
+            <div style="margin-top:8px;">
+              <p class="small" style="margin-bottom:8px;">ちょうど1件のみ発見した市区町村を一覧表示します。</p>
+              <div id="oneFList">
+                <!-- JS will populate a table with two columns: 市区町村名 | GCコード（リンク）＋キャッシュ名 -->
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- FTF municipalities (new card) -->
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">FTFを獲得した市区町村</span>
+          <div style="margin-top:8px;">
+            <p class="small" style="margin-bottom:8px;">FTF判定はログ内に {*FTF*}, {FTF}, [FTF] がある場合に行います。（リストは読み込めません）</p>
+            <div id="ftfList">読み込み待ち...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Challenges card -->
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Challenges</span>
+          <p class="small" style="margin-bottom:8px;"></p>
+          <div id="challenges">
+            <div class="challenge-row">
+              <div class="challenge-label">全国の市でFound</div>
+              <div class="challenge-progress">
+                <div class="progress-track"><div id="challenge-shi-792-fill" class="progress-fill"></div></div>
+                <div id="challenge-shi-792-text" class="challenge-count">0 / 792</div>
+              </div>
+            </div>
+            <div class="challenge-row">
+              <div class="challenge-label">全国の町でFound</div>
+              <div class="challenge-progress">
+                <div class="progress-track"><div id="challenge-cho-743-fill" class="progress-fill"></div></div>
+                <div id="challenge-cho-743-text" class="challenge-count">0 / 743</div>
+              </div>
+            </div>
+
+            <div class="challenge-row">
+              <div class="challenge-label">全国の村でFound</div>
+              <div class="challenge-progress">
+                <div class="progress-track"><div id="challenge-mura-189-fill" class="progress-fill"></div></div>
+                <div id="challenge-mura-189-text" class="challenge-count">0 / 189</div>
+              </div>
+            </div>
+            <div class="challenge-row">
+              <div class="challenge-label">東京都の特別区でFound</div>
+              <div class="challenge-progress">
+                <div class="progress-track"><div id="challenge-ku-23-fill" class="progress-fill"></div></div>
+                <div id="challenge-ku-23-text" class="challenge-count">0 / 23</div>
+              </div>
+            </div>
+            <div class="challenge-row">
+              <div class="challenge-label">全国の政令指定都市でFound</div>
+              <div class="challenge-progress">
+                <div class="progress-track"><div id="challenge-seirei-20-fill" class="progress-fill"></div></div>
+                <div id="challenge-seirei-20-text" class="challenge-count">0 / 20</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+
+  <!-- External libraries -->
+      
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/rbush@3.0.1/rbush.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
+  <script src="https://unpkg.com/togeojson@0.16.0/dist/togeojson.min.js"></script>
+  <script src="https://unpkg.com/chroma-js@2.4.2/chroma.min.js"></script>
+
+  <!-- Materialize JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function(){ if(window.M && M.AutoInit) M.AutoInit(); });</script>
+
+  <!-- App code -->
+  <script src="./main.js"></script>
+  
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-content">Developed by atsu_7 <a href="https://github.com/atsu_7" target="_blank" rel="noopener"> GitHub</a></div>
+      <div class="footer-attribution" style="margin-top:6px;font-size:0.9em;color:#666;">市区町村データの出典：国土交通省 国土数値情報</div>
+    </div>
+  </footer>
+</body>
+</html>

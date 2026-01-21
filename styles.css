@@ -1,0 +1,168 @@
+/* Custom title banner */
+.custom-banner {
+	background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+	box-shadow: 0 2px 8px rgba(25, 118, 210, 0.10);
+	border-radius: 0 0 18px 18px;
+	margin-bottom: 24px;
+	padding: 0;
+}
+.banner-content {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 18px 28px 18px 20px;
+}
+.banner-icon {
+	font-size: 2.6em;
+	color: #fffde7;
+	text-shadow: 0 2px 8px rgba(33, 150, 243, 0.18);
+}
+.banner-title {
+	font-size: 2.1em;
+	font-weight: 700;
+	color: #fff;
+	letter-spacing: 0.04em;
+	text-shadow: 0 2px 8px rgba(33, 150, 243, 0.18);
+}
+/* Highlight selected prefecture badge */
+.pref-item.selected {
+	border: 2px solid #1976d2;
+	background: #e3f2fd !important;
+	box-shadow: 0 0 8px #90caf9;
+}
+.muni-stats { margin-bottom: 8px; font-size: 1em; color: #1976d2; font-weight: 500; }
+/* Municipality ranking horizontal grid */
+.muni-grid { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; margin-top:8px; }
+.muni-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 10px; background:#e3f2fd; border-radius:16px; border:1px solid #90caf9; min-width:120px; box-shadow:none; font-weight:500; }
+.muni-item .count { font-weight:600; color:#1976d2; }
+/* Table for municipality ranking */
+.muni-table { width:100%; border-collapse:collapse; margin-top:8px; }
+.muni-table th { background: #fafafa; font-weight:600; font-size:0.95em; }
+.muni-table td, .muni-table th { padding:8px 10px; border-bottom:1px solid #eee; }
+body { margin:0; font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; }
+#top { padding:12px; max-width:1100px; margin:0 auto; }
+#controls { display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap }
+
+/* Table for 1F-only municipalities */
+.onef-table { width:100%; border-collapse:collapse; margin-top:8px; }
+.onef-table th { background: #fafafa; font-weight:600; font-size:0.95em; text-align:left; }
+.onef-table td, .onef-table th { padding:8px 10px; border-bottom:1px solid #eee; vertical-align:middle; }
+.onef-table .muni-col { width:45%; }
+.onef-table .cache-col { width:55%; }
+
+/* Style the details/summary used for collapsible 1F card */
+.onef-details summary {
+	list-style: none; /* remove default marker */
+	cursor: pointer;
+	outline: none;
+}
+.onef-details summary::-webkit-details-marker { display: none; }
+.onef-details summary.card-title {
+	display: block;
+	margin-bottom: 0.25rem;
+}
+.onef-details[open] > summary::after {
+	content: "▲";
+	float: right;
+	font-size: 0.9em;
+	color: rgba(0,0,0,0.6);
+}
+.onef-details:not([open]) > summary::after {
+	content: "▼";
+	float: right;
+	font-size: 0.9em;
+	color: rgba(0,0,0,0.6);
+}
+
+/* municipality list shown under selected prefecture */
+.pref-muni-grid { margin-top: 8px; }
+.pref-muni-grid .muni-item { cursor: pointer; }
+
+/* Divider between prefecture badges and municipality badges */
+#prefMuniList {
+	border-top: 1px solid #e6e6e6;
+	padding-top: 10px;
+	margin-top: 10px;
+}
+
+/* Ensure the summary sentence in the prefecture muni area occupies its own row
+	 so it doesn't sit inline next to badges (the container is a flex row). */
+#prefMuniList > #prefSummarySentence,
+#prefMuniList > p.small {
+	display: block;
+	flex-basis: 100%;
+	width: 100%;
+	margin-bottom: 12px;
+}
+
+/* Highlighted counts inside summary sentences */
+.summary-highlight {
+	font-weight: 700;
+	color: #1976d2;
+}
+
+/* Challenges styles */
+.challenge-row { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+.challenge-label { width:220px; font-weight:600; color:rgba(0,0,0,0.8); }
+.challenge-progress { flex:1; display:flex; align-items:center; gap:8px; }
+.progress-track { flex:1; height:14px; background:#eee; border-radius:8px; overflow:hidden; }
+.progress-fill { height:100%; width:0%; background: linear-gradient(90deg,#fcae91,#de2d26); transition: width 400ms ease; }
+.challenge-count { min-width:80px; text-align:right; font-weight:600; color:rgba(0,0,0,0.7); }
+
+/* Base adjustments while using Materialize */
+#map { height: 70vh; border:1px solid #e0e0e0; background:#fff; border-radius:4px; }
+.info { background:#fff; padding:8px; border-radius:6px; box-shadow:none; }
+.legend { background:#fff; padding:6px; border-radius:6px; }
+.small { font-size:0.95em; color:rgba(0,0,0,0.7); }
+
+/* Ensure card body text uses a consistent size and color */
+.card .card-content,
+.card .card-content p,
+.card .card-content .small {
+	font-size: 0.95em;
+	color: rgba(0,0,0,0.75);
+	line-height: 1.5;
+}
+
+/* Ensure emphasized labels inside cards (like 注意, 使い方) match body text size */
+.card .card-content b,
+.card .card-content strong {
+  font-size: 0.95em;
+  font-weight: 700;
+  line-height: 1.5;
+}
+pre { background:#f8f8f8; padding:8px; border-radius:6px; overflow:auto }
+
+/* ensure file-path input fills available space */
+.file-path-wrapper .file-path { width:100%; }
+
+/* Prefecture counts horizontal grid */
+.pref-grid { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; margin-top:8px; }
+.pref-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 10px; background:#fafafa; border-radius:16px; border:1px solid #e0e0e0; min-width:120px; box-shadow:none; }
+
+/* Ensure buttons fit their text */
+.btn {
+	min-width: 0;
+	padding-left: 20px;
+	padding-right: 20px;
+	white-space: nowrap;
+}
+.btn, .btn-large, .btn-small {
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: 100%;
+	white-space: nowrap;
+	display: inline-block !important;
+	visibility: visible !important;
+	overflow: visible !important;
+}
+.pref-item .count { font-weight:600; color:rgba(0,0,0,0.8); }
+.pref-item.full { background: #e8f5e9; border-color: #c8e6c9; }
+.pref-item.partial { background: #fff8e1; border-color: #ffecb3; }
+.pref-item.empty { background: #f5f5f5; border-color: #eeeeee; }
+
+/* Footer styles */
+.app-footer { border-top: 1px solid #eee; margin-top: 18px; padding: 12px 0; text-align: center; }
+.app-footer .footer-content { color: rgba(0,0,0,0.6); font-size: 0.92em; }
+.app-footer a { color: #1976d2; text-decoration: none; font-weight: 600; }
+.app-footer a:hover { text-decoration: underline; }
