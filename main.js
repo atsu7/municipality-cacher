@@ -26,6 +26,8 @@ function updateMuniRanking(){
   // Aggregate counts by municipality name
   const muniStats = new Map();
   features.forEach((f, idx) => {
+    // skip features that should not be included in statistics
+    if(!isCountedFeature(f)) return;
     const { city, pref } = extractNames(f.properties);
     const key = `${pref} ${city}`;
     const cur = muniStats.get(key) || { name: key, count: 0 };
@@ -80,6 +82,8 @@ function updateMuniRanking(){
     let gshi = 0, gcho = 0, gmura = 0, gku = 0;
     for(const [i, f] of features.entries()){
       try{
+        // skip features that should not be included in statistics
+        if(!isCountedFeature(f)) continue;
         const c = counts.get(i) || 0;
         if(c <= 0) continue;
         const { city } = extractNames(f.properties);
@@ -264,6 +268,8 @@ function updateOneFList(points){
     try{
       const found = getMuniForPoint(p.lat, p.lon);
       if(found && typeof found.idx !== 'undefined'){
+        // skip features that should not be included in statistics
+        if(!isCountedFeature(found.feature)) continue;
         const arr = assignedMap.get(found.idx) || [];
         arr.push({ pt: p, found });
         assignedMap.set(found.idx, arr);
@@ -449,6 +455,8 @@ function updateFTFList(points){
   if(!matched) continue;
       const found = getMuniForPoint(p.lat, p.lon);
       if(found && typeof found.idx !== 'undefined'){
+        // skip features that should not be included in statistics
+        if(!isCountedFeature(found.feature)) continue;
         const arr = ftfMap.get(found.idx) || [];
         arr.push({ pt: p, info: extractCacheInfo(p.props || p) });
         ftfMap.set(found.idx, arr);
@@ -533,6 +541,19 @@ function extractNames(props){
   if(!pref) pref='(不明)';
   if(!city) city='(不明)';
   return {pref: String(pref), city: String(city)};
+}
+
+// Determine whether a feature should be included in statistics.
+// Include only when municipality name (N03_004 or fallback N03_003) ends with 市/区/町/村.
+function isCountedFeature(feature){
+  try{
+    if(!feature || !feature.properties) return false;
+    const { city } = extractNames(feature.properties);
+    const nm = String(city || '').trim();
+    if(nm.length === 0) return false;
+    const last = nm.charAt(nm.length - 1);
+    return (last === '市' || last === '区' || last === '町' || last === '村');
+  }catch(e){ return false; }
 }
 
 // Map setup
@@ -705,11 +726,13 @@ function updateChallenges(){
   let gshi = 0, gcho = 0, gmura = 0, gku = 0;
   for(const [i,f] of features.entries()){
     try{
+      // skip features that should not be included in statistics
+      if(!isCountedFeature(f)) continue;
       const c = counts.get(i) || 0;
       if(c <= 0) continue;
       const { city } = extractNames(f.properties);
       const nm = String(city||'').trim();
-      const last = nm.length ? nm.charAt(nm.length-1) : '';
+      const last = nm.length ? nm.charAt(nm.length - 1) : '';
       if(last === '市') gshi++;
       else if(last === '町') gcho++;
       else if(last === '村') gmura++;
@@ -726,6 +749,8 @@ function updateChallenges(){
   const seireiFound = new Set();
   for(const [i,f] of features.entries()){
     try{
+      // skip features that should not be included in statistics
+      if(!isCountedFeature(f)) continue;
       const c = counts.get(i) || 0;
       if(c <= 0) continue;
       const { city } = extractNames(f.properties);
@@ -794,6 +819,8 @@ function updatePrefCounts(){
   // 集計: 都道府県ごとの発見市町村数と総数
   const stats = new Map();
   features.forEach((f, idx) => {
+    // skip features that should not be included in statistics
+    if(!isCountedFeature(f)) return;
     const { pref } = extractNames(f.properties);
     const key = pref || '(不明)';
     const cur = stats.get(key) || { found: 0, total: 0 };
@@ -848,7 +875,9 @@ function updatePrefCounts(){
     if(prefMuniEl){
       prefMuniEl.innerHTML = '';
       if(window._selectedPref){
-        const munis = features.map((f, idx) => ({ f, idx })).filter(o => extractNames(o.f.properties).pref === window._selectedPref);
+        const munis = features.map((f, idx) => ({ f, idx }))
+          .filter(o => extractNames(o.f.properties).pref === window._selectedPref)
+          .filter(o => isCountedFeature(o.f));
         if(munis.length === 0){ prefMuniEl.textContent = '該当なし'; }
         else {
           // sort by found count desc, then name asc
@@ -1132,6 +1161,8 @@ if(__downloadBtn2){
   __downloadBtn2.addEventListener('click', ()=>{
     const rows = [['都道府県','市区町村','件数']];
     features.forEach((f, idx)=>{
+      // Only include features that are counted in statistics
+      if(!isCountedFeature(f)) return;
       const {pref, city} = extractNames(f.properties);
       const c = counts.get(idx) || 0;
       rows.push([pref, city, String(c)]);
